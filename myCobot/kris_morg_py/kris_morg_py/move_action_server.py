@@ -8,12 +8,12 @@ from kris_morg_interfaces.action import Move
 
 class MoveServer(Node):
     def __init__(self):
-        super().__init__('move_server')
+        super().__init__('move_server',namespace="shaggy")
 
         self.goal = Move.Goal()
         self.mc = MyCobot("/dev/ttyAMA0", 115200)
 
-        self._action_server = ActionServer(self, Move, 'move', 
+        self._action_server = ActionServer(self, Move, '/shaggy/move', 
                                            execute_callback = self.execute_callback,
                                            goal_callback = self.goal_callback)
         
@@ -26,10 +26,14 @@ class MoveServer(Node):
         joints = self.goal.joints #float list[6]
         speed = self.goal.speed #default 80, also, how work?
 
-        print(joints)
-        print(speed)
+        print('Joint radians:',joints)
+        print('Speed:',speed)
 
-        #self.mc.send_radians(joints,speed)
+        # Do goal
+        self.mc.send_radians(joints,speed)
+
+        # Set everything to completed
+        goal_handle.succeed()
         result = Move.Result()
         result.success = True
         return result
