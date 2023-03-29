@@ -1,0 +1,12 @@
+#Goal
+
+# A list of radian values( List[float]), length 6 
+float32[6] joints
+# Speed to make the change
+int16 speed 80
+---
+#Result
+
+bool success
+---
+#Feedback
