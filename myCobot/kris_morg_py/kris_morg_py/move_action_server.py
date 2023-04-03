@@ -33,16 +33,15 @@ class MoveServer(Node):
 
         # Do goal
         self.mc.send_radians(joints,speed)
-
-        #below doesnt work! Timer?
-        while not self.mc.is_in_position(joints):
-            print(self.mc.get_angles())
-
-        # Set everything to completed
-        goal_handle.succeed()
-        result = Move.Result()
-        result.success = True
-        return result
+        
+        while True:
+            print("Moving!")
+            if(self.mc.is_moving()): # If its done moving
+                # Set everything to completed
+                goal_handle.succeed()
+                result = Move.Result()
+                result.success = True
+                return result
 
     def destroy(self):
         self._action_server.destroy()
