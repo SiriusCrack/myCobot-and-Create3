@@ -13,14 +13,15 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='er',
-    maintainer_email='er@todo.todo',
-    description='TODO: Package description',
+    maintainer='Kristie Olds',
+    maintainer_email='olds8434@vandals.uidaho.edu',
+    description='Manipulating the MyCobot 320Pi via ROS2',
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
 		'move_action_server_exe = kris_morg_py.move_action_server:main',
+		'with_roomba_exe = kris_morg_py.with_roomba:main',
         ],
     },
 )

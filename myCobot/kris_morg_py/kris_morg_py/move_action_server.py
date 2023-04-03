@@ -6,14 +6,16 @@ from rclpy.action import ActionServer, GoalResponse
 from rclpy.node import Node
 from kris_morg_interfaces.action import Move
 
+cobot_name = "velma"
+
 class MoveServer(Node):
     def __init__(self):
-        super().__init__('move_server',namespace="shaggy")
+        super().__init__('move_server',namespace=cobot_name)
 
         self.goal = Move.Goal()
         self.mc = MyCobot("/dev/ttyAMA0", 115200)
 
-        self._action_server = ActionServer(self, Move, '/shaggy/move', 
+        self._action_server = ActionServer(self, Move, f'/{cobot_name}/move', 
                                            execute_callback = self.execute_callback,
                                            goal_callback = self.goal_callback)
         
@@ -31,6 +33,10 @@ class MoveServer(Node):
 
         # Do goal
         self.mc.send_radians(joints,speed)
+
+        #below doesnt work! Timer?
+        while not self.mc.is_in_position(joints):
+            print(self.mc.get_angles())
 
         # Set everything to completed
         goal_handle.succeed()
