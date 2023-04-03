@@ -1,0 +1,13 @@
+#Goal
+
+# Either open or close the gripper. 0 - open, 1 - close
+int16 state
+# Speed to make the change
+int16 speed 80
+---
+#Result
+
+bool success
+---
+#Feedback
+

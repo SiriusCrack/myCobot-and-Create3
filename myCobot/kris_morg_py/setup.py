@@ -22,6 +22,7 @@ setup(
         'console_scripts': [
 		'move_action_server_exe = kris_morg_py.move_action_server:main',
 		'with_roomba_exe = kris_morg_py.with_roomba:main',
+		'gripper_action_server_exe = kris_morg_py.gripper_action_server:main',
         ],
     },
 )

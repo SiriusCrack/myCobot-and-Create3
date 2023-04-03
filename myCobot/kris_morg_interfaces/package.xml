@@ -3,8 +3,8 @@
 <package format="3">
   <name>kris_morg_interfaces</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="er@todo.todo">er</maintainer>
+  <description>ROS2 Actions for MyCobot 320Pi</description>
+  <maintainer email="olds8434@vandals.uidaho.edu">Kristie Olds</maintainer>
   <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
