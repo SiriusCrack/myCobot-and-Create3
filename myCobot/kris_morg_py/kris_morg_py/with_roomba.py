@@ -3,7 +3,7 @@ import rclpy
 from pymycobot.mycobot import MyCobot
 from rclpy.action import ActionClient, GoalResponse
 from rclpy.node import Node
-from kris_morg_interfaces.action import Move
+from kris_morg_interfaces.action import Move, Gripper
 from std_msgs.msg import String
 
 cobot_name = "velma"

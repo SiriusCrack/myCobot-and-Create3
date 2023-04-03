@@ -35,7 +35,7 @@ class MoveServer(Node):
         self.mc.send_radians(joints,speed)
         
         while True:
-            print("Moving!")
+            #print("Moving!")
             if(self.mc.is_moving()): # If its done moving
                 # Set everything to completed
                 goal_handle.succeed()

@@ -35,7 +35,6 @@ class GripServer(Node):
         print('Speed:',speed)
 
         # Do goal
-        print(self.mc.get_gripper_value())
         self.mc.set_gripper_state(state, speed)
 
         while True:
