@@ -27,10 +27,12 @@ class GripServer(Node):
     async def execute_callback(self, goal_handle):
         state = self.goal.state #int 1 or 0
         speed = self.goal.speed #default 80
-
+    
         if state > 1 or state < 0:
             raise ValueError("state must be either a 1 or 0")
 
+        GoalResponse.EXECUTING 
+        
         print('State:', "Close" if state == 1 else "Open")
         print('Speed:',speed)
 
@@ -44,6 +46,7 @@ class GripServer(Node):
                 goal_handle.succeed()
                 result = Gripper.Result()
                 result.success = True
+                GoalResponse.SUCCEEDED
                 return result
 
     def destroy(self):

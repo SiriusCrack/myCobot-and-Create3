@@ -28,6 +28,8 @@ class MoveServer(Node):
         joints = self.goal.joints #float list[6]
         speed = self.goal.speed #default 80, also, how work?
 
+        GoalResponse.EXECUTING 
+        
         print('Joint radians:',joints)
         print('Speed:',speed)
 
@@ -41,6 +43,7 @@ class MoveServer(Node):
                 goal_handle.succeed()
                 result = Move.Result()
                 result.success = True
+                GoalResponse.SUCCEEDED
                 return result
 
     def destroy(self):
