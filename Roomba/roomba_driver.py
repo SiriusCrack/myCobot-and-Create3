@@ -60,7 +60,7 @@ class RoombaDriver(Node):
 
         self._publisher = self.create_publisher (
             String,
-            f'/{cobot_name}/message_roomba',
+            f'/{roomba_name}/message_roomba',
             10
         )
 
@@ -73,7 +73,7 @@ class RoombaDriver(Node):
         )
         self._cobot_subscription = self.create_subscription (
             String,
-            f'/{roomba_name}/message_cobot',
+            f'/{cobot_name}/message_cobot',
             self.listener_callback,
             callback_group = cb_Communication
         )
