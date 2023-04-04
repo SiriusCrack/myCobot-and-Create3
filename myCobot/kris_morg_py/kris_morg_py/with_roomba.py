@@ -13,28 +13,17 @@ class DoteOnRoomba(Node):
     def __init__(self):
         super().__init__('dote_on_roomba')
 
-        # 2 Seperate Callback Groups for handling the Roomba Subscription and Action Client
-        #cb_Subscripion = MutuallyExclusiveCallbackGroup()
-        #cb_Action = MutuallyExclusiveCallbackGroup()
-
-        self._action_client = ActionClient(self, Move, f'/{cobot_name}/move')#, callback_group = cb_Action)
+        self._action_client = ActionClient(self, Move, f'/{cobot_name}/move')
+        
         # Subscription from Roomba (Roomba -> MyCobot)
-        #self._subscription_ = self.create_subscription(
-        #    String, f'/{roomba_name}/<roombaNode>', 
-        #    self.listener_callback, Queue = X,
-        #    callback_group=cb_Subscripion)
+        self._subscription_ = self.create_subscription(
+            String, f'/{roomba_name}/message_roomba', 
+            self.listener_callback, 10)
+        
         # Publisher to Roomba (MyCobot -> Roomba)
         self._publisher_ = self.create_publisher(String, # Type of message
-                                                f'/{cobot_name}/message_roomba', 
+                                                f'/{cobot_name}/message_cobot', 
                                                 10) # 10 = Queue Size
-        """
-        Subcription to publisher above:
-        self.subscription = self.create_subscription(
-            String,
-            f'/{cobot_name}/message_roomba',
-            self.listener_callback,
-            10)
-        """
         # Variables
         self._roomba_ready = False
 
