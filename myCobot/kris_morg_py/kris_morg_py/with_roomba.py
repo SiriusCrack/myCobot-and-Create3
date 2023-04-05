@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+"""
+Before running this, make sure that the move and gripper action servers are 
+running! (TODO Launch file those)
+To run:
+ros2 run kris_morg_py with_roomba_exe
+"""
+
 import rclpy
 from pymycobot.mycobot import MyCobot
 from rclpy.action import ActionClient, GoalResponse
@@ -67,6 +74,7 @@ class DoteOnRoomba(Node):
             return
         else:
             #If here, there was an issue....?
+            print("Ooops. I'm in the else...")
             return
 
     def toBox(self):
