@@ -42,9 +42,6 @@ class GripServer(Node):
         if state > 1 or state < 0:
             raise ValueError("state must be either a 1 or 0")
 
-        GoalResponse.EXECUTING 
-        
-
         print('State:', "Close" if state == 1 else "Open")
         print('Speed:',speed)
 
@@ -56,14 +53,16 @@ class GripServer(Node):
             if goal_handle.is_cancel_requested:
                 goal_handle.canceled()
                 self.get_logger().info('Goal canceled')
-                return Gripper.Result()
+                result = Gripper.Result()
+                result.success = False
+                return result
             if not self.mc.is_gripper_moving(): # If its done moving
                 # Set everything to completed
                 goal_handle.succeed()
                 result = Gripper.Result()
                 result.success = True
-                GoalResponse.SUCCEEDED
                 return result
+            
     def destroy(self):
         self._action_server.destroy()
         super().destroy_node()
