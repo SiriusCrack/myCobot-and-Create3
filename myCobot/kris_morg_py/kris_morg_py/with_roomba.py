@@ -1,11 +1,4 @@
 #!/usr/bin/env python3
-"""
-Before running this, make sure that the move and gripper action servers are 
-running! (TODO Launch file those)
-To run:
-ros2 run kris_morg_py with_roomba_exe
-"""
-
 import rclpy
 from pymycobot.mycobot import MyCobot
 from rclpy.action import ActionClient, GoalResponse
@@ -20,19 +13,28 @@ class DoteOnRoomba(Node):
     def __init__(self):
         super().__init__('dote_on_roomba')
 
-        self.move_action_client = ActionClient(self, Move, f'/{cobot_name}/move')
-        self.grip_action_client = ActionClient(self, Gripper, f'/{cobot_name}/gripper')
+        # 2 Seperate Callback Groups for handling the Roomba Subscription and Action Client
+        #cb_Subscripion = MutuallyExclusiveCallbackGroup()
+        #cb_Action = MutuallyExclusiveCallbackGroup()
 
+        self._action_client = ActionClient(self, Move, f'/{cobot_name}/move')#, callback_group = cb_Action)
         # Subscription from Roomba (Roomba -> MyCobot)
-        self._subscription_ = self.create_subscription(
-            String, f'/{roomba_name}/message_roomba', 
-            self.listener_callback, 
-            10) # Queue size
-        
+        #self._subscription_ = self.create_subscription(
+        #    String, f'/{roomba_name}/<roombaNode>', 
+        #    self.listener_callback, Queue = X,
+        #    callback_group=cb_Subscripion)
         # Publisher to Roomba (MyCobot -> Roomba)
         self._publisher_ = self.create_publisher(String, # Type of message
-                                                f'/{cobot_name}/message_cobot', 
+                                                f'/{cobot_name}/message_roomba', 
                                                 10) # 10 = Queue Size
+        """
+        Subcription to publisher above:
+        self.subscription = self.create_subscription(
+            String,
+            f'/{cobot_name}/message_roomba',
+            self.listener_callback,
+            10)
+        """
         # Variables
         self._roomba_ready = False
 
@@ -43,76 +45,18 @@ class DoteOnRoomba(Node):
         which action it will need to take.
         '''
         if msg == 'Place box':
-            # Open grip
-            self.grip(0) 
-            # Move to box
-            self.toBox()
-            # Close grip, grabbing box
-            self.grip(1)
-            # Move to the Roomba
-            self.toRoomba()
-            # Let go of the box
-            self.grip(0)
-
+            #place box
             #publish 'done' to Roomba
             self._publisher_.publish('Done')
-            return
+            pass
         elif msg == 'Remove box':
-            # Open grip
-            self.grip(0)
-            # Move to the Roomba
-            self.toRoomba()
-            # Close grip, grabbing box
-            self.grip(1)
-            # Move to box
-            self.toBox()
-            # Let go of the box
-            self.grip(0)
-
+            #remove box
             #publish 'done' to Roomba
             self._publisher_.publish('Done')
-            return
+            pass
         else:
             #If here, there was an issue....?
-            print("Ooops. I'm in the else...")
-            return
-
-    def toBox(self):
-        """
-        This function will move the arm to the box location for either placing or
-        grabbing.
-        If its picking up the box, remember to open gripper first! Otherwise 
-        you will push the box away...
-        """
-        action_client = self.move_action_client
-        action_client.wait_for_server()
-        goal = Move.Goal()
-        goal.joints = [] #List of radians to move
-        action_client.send_goal(goal)
-
-    def grip(self, state):
-        """
-        Open/close the gripper via ROS. 0 is open, 1 is close
-        """
-        action_client = self.grip_action_client
-        action_client.wait_for_server()
-        goal = Gripper.Goal()
-        goal.state = state 
-        action_client.send_goal(goal)
-
-    def toRoomba(self):
-        """
-        This function will move the arm to the Roomba for either placing or
-        grabbing.
-        If its picking up the box, remember to open gripper first! Otherwise 
-        you will push the box away...
-        """
-        action_client = self.move_action_client
-        action_client.wait_for_server()
-        goal = Move.Goal()
-        goal.joints = [] #List of radians to move
-        action_client.send_goal(goal)
-
+            pass
 
 def main(args=None):
     rclpy.init()
