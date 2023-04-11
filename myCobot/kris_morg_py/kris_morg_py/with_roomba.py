@@ -121,7 +121,7 @@ class DoteOnRoomba(Node):
             action_client = self.move_action_client
             action_client.wait_for_server()
             goal = Move.Goal()
-            goal.joints = [0,1.4,.7,1,-1.2,0] # Lower to the cube
+            goal.joints = [0,1.4,0.7,1,-1.2,0] # Lower to the cube
             goal.speed = 30
             action_client.send_goal(goal)
         elif where == 1: # Over the Roomba
@@ -137,7 +137,7 @@ class DoteOnRoomba(Node):
         goal = Move.Goal()
         goal.joints = [0,0,0,0,0,0] # Lower to the cube
         action_client.send_goal(goal)
-        
+
 def main(args=None):
     rclpy.init()
     roombaTime = DoteOnRoomba()

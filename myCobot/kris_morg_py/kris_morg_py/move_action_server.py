@@ -45,6 +45,16 @@ class MoveServer(Node):
         print('Joint radians:',joints)
         print('Speed:',speed)
 
+        if speed > 100:
+            raise ValueError("Speed cannot be higher than 100")
+        elif speed == 0:
+            raise ValueError("Speed cannot be 0")
+        elif speed < 0:
+            raise ValueError("Speed cannot be less than 0")
+        
+        if any((x > 1.8 or x < -1.8)  for x in joints): # If any radian movement is larger than 2 (360)
+            raise ValueError("Potiental damage from high radian value")
+
         # Do goal
         self.mc.send_radians(joints,speed)
 
@@ -57,7 +67,7 @@ class MoveServer(Node):
                 result.success = False
                 return result
 
-            if(self.mc.is_moving()): # If its done moving
+            if not self.mc.is_moving(): # If its done moving
                 # Set everything to completed
                 goal_handle.succeed()
                 result = Move.Result()

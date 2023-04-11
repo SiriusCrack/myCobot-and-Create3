@@ -41,6 +41,13 @@ class GripServer(Node):
     
         if state > 1 or state < 0:
             raise ValueError("state must be either a 1 or 0")
+        
+        if speed > 100:
+            raise ValueError("Speed cannot be higher than 100")
+        elif speed == 0:
+            raise ValueError("Speed cannot be 0")
+        elif speed < 0:
+            raise ValueError("Speed cannot be less than 0")
 
         print('State:', "Close" if state == 1 else "Open")
         print('Speed:',speed)
