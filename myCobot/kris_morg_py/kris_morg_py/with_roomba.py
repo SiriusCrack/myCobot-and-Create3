@@ -88,8 +88,6 @@ class DoteOnRoomba(Node):
         """
         This function will move the arm to the box location for either placing or
         grabbing.
-        If its picking up the box, remember to open gripper first! Otherwise 
-        you will push the box away...
         """
         action_client = self.move_action_client
         action_client.wait_for_server()
@@ -109,8 +107,6 @@ class DoteOnRoomba(Node):
         """
         This function will move the arm to the Roomba for either placing or
         grabbing.
-        If its picking up the box, remember to open gripper first! Otherwise 
-        you will push the box away...
         """
         action_client = self.move_action_client
         action_client.wait_for_server()
@@ -119,19 +115,21 @@ class DoteOnRoomba(Node):
         action_client.send_goal(goal)
     def lowerToGrab(self, where):
         """
-        Precise slow movement to grab box
+        Precise slow movement to grab/place box
         """
         if where == 0: # Inital State
             action_client = self.move_action_client
             action_client.wait_for_server()
             goal = Move.Goal()
             goal.joints = [0,1.4,.7,1,-1.2,0] # Lower to the cube
+            goal.speed = 30
             action_client.send_goal(goal)
         elif where == 1: # Over the Roomba
             action_client = self.move_action_client
             action_client.wait_for_server()
             goal = Move.Goal()
             goal.joints = [] # Lower to the cube
+            goal.speed = 30
             action_client.send_goal(goal)
     def resetPos(self):
         action_client = self.move_action_client
@@ -139,6 +137,7 @@ class DoteOnRoomba(Node):
         goal = Move.Goal()
         goal.joints = [0,0,0,0,0,0] # Lower to the cube
         action_client.send_goal(goal)
+        
 def main(args=None):
     rclpy.init()
     roombaTime = DoteOnRoomba()
