@@ -139,10 +139,12 @@ class DoteOnRoomba(Node):
         action_client.send_goal(goal)
 
 def main(args=None):
-    rclpy.init()
-    roombaTime = DoteOnRoomba()
-    rclpy.spin(roombaTime)
-    roombaTime.destroy()
-    rclpy.shutdown()
+    try:
+        rclpy.init()
+        roombaTime = DoteOnRoomba()
+        rclpy.spin(roombaTime)
+    except KeyboardInterrupt: # Wait for manual shutdown
+        roombaTime.destroy()
+        rclpy.shutdown()
 if __name__ == '__main__':
     main()

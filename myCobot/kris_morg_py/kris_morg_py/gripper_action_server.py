@@ -74,14 +74,15 @@ class GripServer(Node):
         self._action_server.destroy()
         super().destroy_node()
 def main(args=None):
-    rclpy.init()
+    try:
+        rclpy.init()
 
-    grip_action_server = GripServer()
+        grip_action_server = GripServer()
 
-    rclpy.spin(grip_action_server)
-    rclpy.spin(grip_action_server, executor = MultiThreadedExecutor())
-
-    grip_action_server.destroy()
-    rclpy.shutdown()
+        rclpy.spin(grip_action_server)
+        rclpy.spin(grip_action_server, executor = MultiThreadedExecutor())
+    except KeyboardInterrupt: # Wait for manual shutdown
+        grip_action_server.destroy()
+        rclpy.shutdown()
 if __name__ == '__main__':
     main()

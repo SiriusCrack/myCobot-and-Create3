@@ -79,14 +79,15 @@ class MoveServer(Node):
         super().destroy_node()
 
 def main(args=None):
-    rclpy.init()
+    try:
+        rclpy.init()
 
-    move_action_server = MoveServer()
+        move_action_server = MoveServer()
 
-    rclpy.spin(move_action_server)
-    rclpy.spin(move_action_server, executor = MultiThreadedExecutor())
-
-    move_action_server.destroy()
-    rclpy.shutdown()
+        rclpy.spin(move_action_server)
+        rclpy.spin(move_action_server, executor = MultiThreadedExecutor())
+    except KeyboardInterrupt: # Wait for manual shutdown
+        move_action_server.destroy()
+        rclpy.shutdown()
 if __name__ == '__main__':
     main()
