@@ -84,7 +84,6 @@ def main(args=None):
 
         move_action_server = MoveServer()
 
-        rclpy.spin(move_action_server)
         rclpy.spin(move_action_server, executor = MultiThreadedExecutor())
     except KeyboardInterrupt: # Wait for manual shutdown
         move_action_server.destroy()

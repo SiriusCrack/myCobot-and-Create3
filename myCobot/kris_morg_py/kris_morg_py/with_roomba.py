@@ -142,6 +142,7 @@ def main(args=None):
     try:
         rclpy.init()
         roombaTime = DoteOnRoomba()
+        #while True: # Keep running until theres a forced stop (just in case)
         rclpy.spin(roombaTime)
     except KeyboardInterrupt: # Wait for manual shutdown
         roombaTime.destroy()
