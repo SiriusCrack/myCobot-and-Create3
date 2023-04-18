@@ -111,7 +111,7 @@ class DoteOnRoomba(Node):
         action_client = self.move_action_client
         action_client.wait_for_server()
         goal = Move.Goal()
-        goal.joints = [] #List of radians to move
+        goal.joints = [] # Just above the cube
         action_client.send_goal(goal)
     def lowerToGrab(self, where):
         """
@@ -135,7 +135,7 @@ class DoteOnRoomba(Node):
         action_client = self.move_action_client
         action_client.wait_for_server()
         goal = Move.Goal()
-        goal.joints = [0,0,0,0,0,0] # Lower to the cube
+        goal.joints = [0,0,0,0,0,0] 
         action_client.send_goal(goal)
 
 def main(args=None):
