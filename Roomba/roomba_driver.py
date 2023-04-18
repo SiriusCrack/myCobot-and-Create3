@@ -3,24 +3,26 @@ from pynput.keyboard import KeyCode
 
 import math
 from threading import Lock
+import time
 
 import rclpy
 from rclpy.action.client import ActionClient
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
-from rclpy.qos import qos_profile_sensor_data
+from rclpy.qos import qos_profile_sensor_data, qos_profile_system_default
 
 from action_msgs.msg._goal_status import GoalStatus
 from irobot_create_msgs.action import Undock, Dock, DriveDistance, RotateAngle
 from nav_msgs.msg import Odometry
+from sensor_msgs.msg import Range
 from std_msgs.msg import String
 from tf_transformations import euler_from_quaternion
 
 lock = Lock()
 
 cobot_name = "velma"
-roomba_name = "create3_05AE"
+roomba_name = "create3_0585"
 
 class RoombaDriver(Node):
     def __init__(self):
@@ -71,26 +73,63 @@ class RoombaDriver(Node):
             qos_profile_sensor_data,
             callback_group = cb_Navigation
         )
+        self._range_subscription = self.create_subscription (
+            Range,
+            f'/{roomba_name}/ir',
+            self.ir_callback,
+            qos_profile_sensor_data,
+            callback_group=cb_Navigation
+        )
         self._cobot_subscription = self.create_subscription (
             String,
             f'/{cobot_name}/message_cobot',
             self.listener_callback,
+            qos_profile_system_default,
             callback_group = cb_Communication
         )
     
-    def listener_callback(self, msg):
-        if msg == 'Done':
-            self.execute_return()
     def odometer_callback(self, msg):
-        self._current_pose = msg.pose.pose
+        self._current_pose = msg.pose.pose #pose.pose is pose, contains position
+    def ir_callback(self, msg):
+        self.get_logger().warning('nice')
+        self.get_logger().warning(str(msg.range))
+    def listener_callback(self, msg):
+        if msg == 'Box placed':
+            self.execute_walk()
+        if msg == 'Box taken':
+            self.get_logger().warning('FINISHED')
     
     def execute_start(self):
         self.do_undock()
-        self.do_drive(0.5)
-        self._publisher.publish('Place box')
-    def execute_return(self):
+        self.do_drive(0.2)
+        self._dock_position = self._current_pose.position
+        self.do_turn(-1.57)
+        self.do_drive(1.0)
+        self.execute_pickup()
+    def execute_pickup(self):
         self.do_turn(3.14)
-        self.do_drive(0.4)
+        self.do_drive(1.0)
+        self.do_turn(1.57)
+        self.do_dock()
+        self._publisher.publish('Place box')
+        # time.sleep(3)
+        # self.execute_walk()
+    def execute_walk(self):
+        self.do_undock()
+        self.do_drive(1.5)
+        self.do_turn(-1.0)
+        self.do_drive(1.0)
+        self.do_turn(3.5)
+        self.do_drive(1.0)
+        self.do_turn(10.0)
+        self.do_drive(0.5)
+        self.execute_return()
+        self._publisher.publish('Take box')
+        # time.sleep(3)
+        # self.get_logger().warning('FINISHED')
+    def execute_return(self):
+        self.do_turn(self.calculate_turnangle(self._current_pose, self._dock_position))
+        self.do_drive(self.calculate_distance(self._current_pose.position, self._dock_position))
         self.do_dock()
     
     def do_drive(self, distance):
@@ -111,7 +150,9 @@ class RoombaDriver(Node):
                 break
             pass
         with lock:
+            self.get_logger().warning('cancelled')
             self._goal_uuid = None
+
     def do_turn(self, angle):
         self.get_logger().warning('TURN ' + str(angle))
         action_client = self._rotate_action_client
@@ -131,6 +172,7 @@ class RoombaDriver(Node):
         action_client.wait_for_server()
         goal = Dock.Goal()
         action_client.send_goal(goal)
+        self.get_logger().warning('DOCKED!')
     
     def calculate_turnangle(self, current_pose, target_position):
         current_yaw = euler_from_quaternion([
