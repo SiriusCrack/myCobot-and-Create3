@@ -52,8 +52,8 @@ class MoveServer(Node):
         elif speed < 0:
             raise ValueError("Speed cannot be less than 0")
         
-        if any((x > 1.8 or x < -1.8)  for x in joints): # If any radian movement is larger than 2 (360)
-            raise ValueError("Potiental damage from high radian value")
+        #if any((x > 1.8 or x < -1.8)  for x in joints): # If any radian movement is larger than 2 (360)
+            #raise ValueError("Potiental damage from high radian value")
 
         # Do goal
         self.mc.send_radians(joints,speed)

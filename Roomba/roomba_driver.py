@@ -17,12 +17,12 @@ from irobot_create_msgs.action import Undock, Dock, DriveDistance, RotateAngle
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import Range
 from std_msgs.msg import String
-from tf_transformations import euler_from_quaternion
+#from tf_transformations import euler_from_quaternion
 
 lock = Lock()
 
 cobot_name = "velma"
-roomba_name = "create3_0585"
+roomba_name = "create3_03EE"
 
 class RoombaDriver(Node):
     def __init__(self):
@@ -94,9 +94,9 @@ class RoombaDriver(Node):
         self.get_logger().warning('nice')
         self.get_logger().warning(str(msg.range))
     def listener_callback(self, msg):
-        if msg == 'Box placed':
+        if msg.data == "Box placed":
             self.execute_walk()
-        if msg == 'Box taken':
+        if msg.data == "Box taken":
             self.get_logger().warning('FINISHED')
     
     def execute_start(self):
@@ -111,7 +111,9 @@ class RoombaDriver(Node):
         self.do_drive(1.0)
         self.do_turn(1.57)
         self.do_dock()
-        self._publisher.publish('Place box')
+        message = String()
+        message.data = "Place box"
+        self._publisher.publish(message)
         # time.sleep(3)
         # self.execute_walk()
     def execute_walk(self):
@@ -124,7 +126,9 @@ class RoombaDriver(Node):
         self.do_turn(10.0)
         self.do_drive(0.5)
         self.execute_return()
-        self._publisher.publish('Take box')
+        message = String()
+        message.data = "Remove box"
+        self._publisher.publish(message)
         # time.sleep(3)
         # self.get_logger().warning('FINISHED')
     def execute_return(self):
@@ -174,7 +178,7 @@ class RoombaDriver(Node):
         action_client.send_goal(goal)
         self.get_logger().warning('DOCKED!')
     
-    def calculate_turnangle(self, current_pose, target_position):
+    """def calculate_turnangle(self, current_pose, target_position):
         current_yaw = euler_from_quaternion([
             current_pose.orientation.x, 
             current_pose.orientation.y, 
@@ -183,7 +187,7 @@ class RoombaDriver(Node):
         ])[2]
         delta_x = target_position.x - current_pose.position.x
         delta_y = target_position.y - current_pose.position.y
-        return math.atan2(delta_y, delta_x) - current_yaw
+        return math.atan2(delta_y, delta_x) - current_yaw"""
     def calculate_distance(self, current_position, target_position):
         delta_x = target_position.x - current_position.x
         delta_y = target_position.y - current_position.y

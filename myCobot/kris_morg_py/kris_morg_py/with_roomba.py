@@ -12,20 +12,28 @@ from rclpy.action import ActionClient, GoalResponse
 from rclpy.node import Node
 from kris_morg_interfaces.action import Move, Gripper
 from std_msgs.msg import String
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
+from rclpy.executors import MultiThreadedExecutor
+import time
 
 cobot_name = "velma"
-roomba_name = None
+roomba_name = "create3_03EE"
 
 class DoteOnRoomba(Node):
     def __init__(self):
         super().__init__('dote_on_roomba')
-        self.move_action_client = ActionClient(self, Move, f'/{cobot_name}/move')
-        self.grip_action_client = ActionClient(self, Gripper, f'/{cobot_name}/gripper')
+
+        cb_Action = MutuallyExclusiveCallbackGroup()
+        cb_Communication = MutuallyExclusiveCallbackGroup()
+
+        self.move_action_client = ActionClient(self, Move, f'/{cobot_name}/move', callback_group = cb_Action)
+        self.grip_action_client = ActionClient(self, Gripper, f'/{cobot_name}/gripper', callback_group = cb_Action)
         # Subscription from Roomba (Roomba -> MyCobot)
         self._subscription_ = self.create_subscription(
             String, f'/{roomba_name}/message_roomba', 
             self.listener_callback, 
-            10) # Queue size
+            10,
+            callback_group = cb_Communication) # Queue size
         
         # Publisher to Roomba (MyCobot -> Roomba)
         self._publisher_ = self.create_publisher(String, # Type of message
@@ -39,45 +47,70 @@ class DoteOnRoomba(Node):
         from the Roomba. Here it parses the message from the Roomba and determines
         which action it will need to take.
         '''
-        if msg == 'Place box':
+        if msg.data == "Place box":
             # Move to box
             self.toBox()
+            time.sleep(1)
             # Open grip
             self.grip(0) 
+            time.sleep(1)
             # Lower to box
             self.lowerToGrab(0)
+            time.sleep(1)
             # Close grip, grabbing box
             self.grip(1)
-            # Move to the Roomba
-            self.toRoomba()
-            # Lower to box placement
-            self.lowerToGrab(1)
-            # Let go of the box
-            self.grip(0)
-            # Publish 'done' to Roomba
-            self._publisher_.publish('Done')
+            time.sleep(1)
             # Reset arm
             self.resetPos()
-            return
-        elif msg == 'Remove box':
+            time.sleep(1)
             # Move to the Roomba
             self.toRoomba()
+            time.sleep(1)
+            # Lower to box placement
+            self.lowerToGrab(1)
+            time.sleep(1)
+            # Let go of the box
+            self.grip(0)
+            time.sleep(1)
+             # Reset arm
+            self.resetPos()
+            # Publish 'done' to Roomba
+            message = String()
+            message.data = "Box placed"
+            self._publisher_.publish(message)
+            return
+        elif msg.data == "Remove box":
+            # Move to the Roomba
+            self.toRoomba()
+            time.sleep(1)
             # Open grip
             self.grip(0)
+            time.sleep(1)
             # Lower to box
             self.lowerToGrab(1)
+            time.sleep(1)
             # Close grip, grabbing box
             self.grip(1)
-            # Move to box
-            self.toBox()
-            # Lower to box placement
-            self.lowerToGrab(0)
-            # Let go of the box
-            self.grip(0)
-            #publish 'done' to Roomba
-            self._publisher_.publish('Done')
+            time.sleep(1)
             # Reset arm
             self.resetPos()
+            time.sleep(1)
+            # Move to box
+            self.toBox()
+            time.sleep(1)
+            # Lower to box placement
+            self.lowerToGrab(0)
+            time.sleep(1)
+            # Let go of the box
+            self.grip(0)
+            time.sleep(1)
+            # Reset arm
+            self.resetPos()
+            # Publish 'done' to Roomba
+            message = String()
+            message.data = "Box taken"
+            self._publisher_.publish(message)
+            
             return
         else:
             #If here, there was an issue....?
@@ -92,7 +125,7 @@ class DoteOnRoomba(Node):
         action_client = self.move_action_client
         action_client.wait_for_server()
         goal = Move.Goal()
-        goal.joints = [0,1,1,1,-1.2,0] # Just above the cube
+        goal.joints = [0.0,1.0,1.0,1.0,-1.2,0.0] # Just above the cube
         action_client.send_goal(goal)
     def grip(self, state):
         """
@@ -111,39 +144,46 @@ class DoteOnRoomba(Node):
         action_client = self.move_action_client
         action_client.wait_for_server()
         goal = Move.Goal()
-        goal.joints = [] # Just above the cube
+        goal.joints = [2.8,0.7,0.5,0.0,-1.5,0.0] # Just above the cube
         action_client.send_goal(goal)
     def lowerToGrab(self, where):
         """
         Precise slow movement to grab/place box
         """
-        if where == 0: # Inital State
+        if where == 0: # Inital box State
             action_client = self.move_action_client
             action_client.wait_for_server()
             goal = Move.Goal()
-            goal.joints = [0,1.4,0.7,1,-1.2,0] # Lower to the cube
+            goal.joints = [0.0,1.4,0.7,1.0,-1.2,0.0] # Lower to the cube
             goal.speed = 30
             action_client.send_goal(goal)
         elif where == 1: # Over the Roomba
             action_client = self.move_action_client
             action_client.wait_for_server()
             goal = Move.Goal()
-            goal.joints = [] # Lower to the cube
+            goal.joints = [2.8,0.7,0.6,0.0,-1.5,0.0] # Lower to the cube
             goal.speed = 30
             action_client.send_goal(goal)
     def resetPos(self):
         action_client = self.move_action_client
         action_client.wait_for_server()
         goal = Move.Goal()
-        goal.joints = [0,0,0,0,0,0] 
+        goal.joints = [0.0,0.0,0.0,0.0,0.0,0.0] 
         action_client.send_goal(goal)
+        self.grip(1)
+
+    def destroy(self):
+        super().destroy_node()
 
 def main(args=None):
     try:
         rclpy.init()
         roombaTime = DoteOnRoomba()
+        executor = MultiThreadedExecutor(2)
+        executor.add_node(roombaTime)
+        executor.spin()
         #while True: # Keep running until theres a forced stop (just in case)
-        rclpy.spin(roombaTime)
+        #rclpy.spin(roombaTime)
     except KeyboardInterrupt: # Wait for manual shutdown
         roombaTime.destroy()
         rclpy.shutdown()
