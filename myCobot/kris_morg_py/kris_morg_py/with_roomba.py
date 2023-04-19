@@ -17,7 +17,7 @@ from rclpy.executors import MultiThreadedExecutor
 import time
 
 cobot_name = "velma"
-roomba_name = "create3_03EE"
+roomba_name = "create3_05AE"
 
 class DoteOnRoomba(Node):
     def __init__(self):
@@ -60,6 +60,9 @@ class DoteOnRoomba(Node):
             # Close grip, grabbing box
             self.grip(1)
             time.sleep(1)
+            # Slow raise to not knock over block
+            self.raiseFromGrab(0)
+            time.sleep(1)
             # Reset arm
             self.resetPos()
             time.sleep(1)
@@ -71,6 +74,9 @@ class DoteOnRoomba(Node):
             time.sleep(1)
             # Let go of the box
             self.grip(0)
+            time.sleep(1)
+            # Slow raise to not knock over block
+            self.raiseFromGrab(1)
             time.sleep(1)
              # Reset arm
             self.resetPos()
@@ -92,6 +98,9 @@ class DoteOnRoomba(Node):
             # Close grip, grabbing box
             self.grip(1)
             time.sleep(1)
+            # Slow raise to not knock over block
+            self.raiseFromGrab(1)
+            time.sleep(1)
             # Reset arm
             self.resetPos()
             time.sleep(1)
@@ -103,6 +112,9 @@ class DoteOnRoomba(Node):
             time.sleep(1)
             # Let go of the box
             self.grip(0)
+            time.sleep(1)
+            # Slow raise to not knock over block
+            self.raiseFromGrab(0)
             time.sleep(1)
             # Reset arm
             self.resetPos()
@@ -125,7 +137,7 @@ class DoteOnRoomba(Node):
         action_client = self.move_action_client
         action_client.wait_for_server()
         goal = Move.Goal()
-        goal.joints = [0.0,1.0,1.0,1.0,-1.2,0.0] # Just above the cube
+        goal.joints = [0.2,1.0,1.0,1.0,-1.0,0.0] # Just above the cube
         action_client.send_goal(goal)
     def grip(self, state):
         """
@@ -144,7 +156,7 @@ class DoteOnRoomba(Node):
         action_client = self.move_action_client
         action_client.wait_for_server()
         goal = Move.Goal()
-        goal.joints = [2.8,0.7,0.5,0.0,-1.5,0.0] # Just above the cube
+        goal.joints = [2.8,0.0,0.0,0.0,-1.5,0.0] # Just above the cube
         action_client.send_goal(goal)
     def lowerToGrab(self, where):
         """
@@ -154,7 +166,7 @@ class DoteOnRoomba(Node):
             action_client = self.move_action_client
             action_client.wait_for_server()
             goal = Move.Goal()
-            goal.joints = [0.0,1.4,0.7,1.0,-1.2,0.0] # Lower to the cube
+            goal.joints = [0.2,1.2,1.1,0.78,-1.0,0.0] # Lower to the cube
             goal.speed = 30
             action_client.send_goal(goal)
         elif where == 1: # Over the Roomba
@@ -162,6 +174,23 @@ class DoteOnRoomba(Node):
             action_client.wait_for_server()
             goal = Move.Goal()
             goal.joints = [2.8,0.7,0.6,0.0,-1.5,0.0] # Lower to the cube
+            goal.speed = 30
+            action_client.send_goal(goal)
+    def raiseFromGrab(self, where):
+        if where == 0:
+            action_client = self.move_action_client
+            action_client.wait_for_server()
+            goal = Move.Goal()
+            # Move up a bit
+            goal.joints = [0.2,1.0,1.0,1.0,-1.0,0.0] # Just above the cube
+            goal.speed = 30
+            action_client.send_goal(goal)
+        elif where == 1:
+            action_client = self.move_action_client
+            action_client.wait_for_server()
+            goal = Move.Goal()
+            # Move up a bit
+            goal.joints = [2.8,0.7,0.5,0.0,-1.5,0.0] # Just above the cube
             goal.speed = 30
             action_client.send_goal(goal)
     def resetPos(self):
